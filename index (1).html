@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MenCore">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="manifest.json">
+<title>MenCore</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+  --card:#16161f;--card2:#1e1e2a;
+  --ac:#00e5a0;--ac2:#00b87a;--acd:rgba(0,229,160,.12);--acd2:rgba(0,229,160,.05);
+  --pu:#7c6af7;--pud:rgba(124,106,247,.15);
+  --am:#f5a623;--amd:rgba(245,166,35,.15);
+  --rd:#ff4d6d;--rdd:rgba(255,77,109,.15);
+  --t1:#f0f0f8;--t2:#8888a8;--t3:#555570;
+  --br:rgba(255,255,255,.06);--br2:rgba(255,255,255,.1);
+  --r:16px;--rsm:10px;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:0;height:0}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,.97);backdrop-filter:blur(20px);border-top:1px solid var(--br);display:flex;z-index:100;padding:6px 0 max(env(safe-area-inset-bottom),6px)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;cursor:pointer;color:var(--t3);font-size:9px;letter-spacing:.04em;text-transform:uppercase;border:none;background:none;font-family:var(--fb);transition:color .2s}
+.ni svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ni.active{color:var(--ac)}
+.ni.active svg{filter:drop-shadow(0 0 5px rgba(0,229,160,.5))}
+
+/* PAGES */
+.page{display:none;min-height:100vh;padding-bottom:85px}
+.page.active{display:block;animation:fin .2s ease}
+@keyframes fin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* HEADER */
+.hdr{padding:52px 20px 14px}
+.hdr-lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.adot{width:7px;height:7px;background:var(--ac);border-radius:50%;box-shadow:0 0 8px var(--ac);flex-shrink:0}
+.hdr h1{font-family:var(--fd);font-size:26px;font-weight:700;line-height:1.1}
+.hdr h1 em{color:var(--ac);font-style:normal}
+.hdr-sub{font-size:13px;color:var(--t2);margin-top:5px}
+.sc{padding:0 16px}
+.sl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin:14px 0 8px;padding:0 2px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.ca{border-color:rgba(0,229,160,.2);background:linear-gradient(135deg,rgba(0,229,160,.04),var(--card))}
+.cp{border-color:rgba(124,106,247,.2);background:linear-gradient(135deg,rgba(124,106,247,.05),var(--card))}
+.divider{height:1px;background:var(--br);margin:14px 0}
+.badge{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:100px;font-weight:500;display:inline-block}
+.bt{background:var(--acd);color:var(--ac)}
+.bp{background:var(--pud);color:var(--pu)}
+.ba{background:var(--amd);color:var(--am)}
+.br_{background:var(--rdd);color:var(--rd)}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card2);border-radius:var(--rsm);padding:12px;text-align:center;border:1px solid var(--br)}
+.stat-n{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--ac)}
+.stat-l{font-size:10px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+
+/* SESSIONS */
+.sess{background:var(--card);border:1px solid var(--br);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.sess-hdr{padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.sess-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sess-info{flex:1}
+.sess-name{font-family:var(--fd);font-size:15px;font-weight:600}
+.sess-meta{font-size:11px;color:var(--t2);margin-top:2px}
+.sess-arr{color:var(--t3);font-size:14px;transition:transform .25s}
+.sess.open .sess-arr{transform:rotate(180deg)}
+.sess-body{display:none;border-top:1px solid var(--br)}
+.sess.open .sess-body{display:block}
+.exi{padding:11px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .1s}
+.exi:active{background:var(--bg3)}
+.exi:last-child{border-bottom:none}
+.exi-n{width:24px;height:24px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--t3);flex-shrink:0;font-family:var(--fd)}
+.exi-info{flex:1;min-width:0}
+.exi-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exi-sets{font-size:11px;color:var(--t3);margin-top:1px}
+.exi-chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--br2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.exi-chk.done{background:var(--ac);border-color:var(--ac)}
+.exi-chk.done::after{content:'✓';font-size:11px;color:#000;font-weight:700}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-family:var(--fd);font-size:17px;font-weight:700}
+.cal-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--br2);background:var(--card2);color:var(--t2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dl{text-align:center;font-size:10px;color:var(--t3);text-transform:uppercase;padding:3px 0 6px}
+.cal-d{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.cal-d .dn{font-size:12px;font-weight:500}
+.cal-d.today{border:1px solid rgba(0,229,160,.35)}
+.cal-d.today .dn{color:var(--ac);font-weight:700}
+.cal-d.other .dn{color:var(--t3)}
+.cdot{width:5px;height:5px;border-radius:50%;margin-top:2px}
+.cdot.full{background:var(--ac)}
+.cdot.part{background:var(--pu)}
+.cdot.rest{background:var(--t3)}
+
+/* HABITS */
+.hab-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--br)}
+.hab-row:last-child{border-bottom:none}
+.hab-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.hab-info{flex:1}
+.hab-name{font-size:14px;font-weight:500}
+.hab-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.tog{width:44px;height:26px;border-radius:13px;border:1.5px solid var(--br2);background:var(--bg3);cursor:pointer;position:relative;transition:all .25s;flex-shrink:0}
+.tog::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--t3);top:2px;left:2px;transition:all .25s}
+.tog.on{background:var(--acd);border-color:var(--ac)}
+.tog.on::after{background:var(--ac);transform:translateX(18px)}
+
+/* TRACKER */
+.streak-box{background:linear-gradient(135deg,rgba(0,229,160,.08),rgba(124,106,247,.05));border:1px solid rgba(0,229,160,.2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:10px}
+.streak-n{font-family:var(--fd);font-size:56px;font-weight:800;color:var(--ac);line-height:1}
+.streak-lbl{font-size:11px;color:var(--t2);margin-top:5px;text-transform:uppercase;letter-spacing:.1em}
+.streak-sub{font-size:13px;color:var(--t3);margin-top:7px}
+.wk-dots{display:flex;gap:5px;margin:8px 0}
+.wk-d{flex:1;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--fd);font-weight:700;text-transform:uppercase}
+.wk-d.done{background:var(--ac);color:#000}
+.wk-d.today-dot{background:var(--acd);color:var(--ac);border:1.5px solid var(--ac)}
+.wk-d.rest{background:var(--bg3);color:var(--t3)}
+.pbw{margin:9px 0}
+.pbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.pbl span:last-child{color:var(--ac);font-weight:600;font-family:var(--fd)}
+.pb{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.pbf{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* LIBRARY */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.fbtn{padding:6px 13px;border-radius:100px;border:1px solid var(--br2);background:transparent;color:var(--t2);font-size:12px;cursor:pointer;white-space:nowrap;font-family:var(--fb);transition:all .15s}
+.fbtn.active{background:var(--ac);color:#000;border-color:var(--ac);font-weight:500}
+.lib-card{background:var(--card);border:1px solid var(--br);border-radius:var(--rsm);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.lib-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ico-t{background:var(--acd)} .ico-p{background:var(--pud)} .ico-a{background:var(--amd)} .ico-r{background:var(--rdd)}
+.lib-info{flex:1;min-width:0}
+.lib-name{font-size:14px;font-weight:500}
+.lib-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.lib-acts{display:flex;gap:5px;flex-shrink:0}
+.icn-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);cursor:pointer;color:var(--t2);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.icn-btn.del:active{background:var(--rdd);color:var(--rd)}
+.add-btn{width:100%;padding:11px;border-radius:var(--rsm);border:1px dashed var(--br2);background:transparent;color:var(--t2);font-family:var(--fb);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;margin-bottom:16px}
+.add-btn:active{background:var(--card2)}
+
+/* SCHEDULE */
+.sch-day{background:var(--card);border:1px solid var(--br);border-radius:var(--rsm);padding:12px 14px;margin-bottom:8px}
+.sch-day-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sch-day-nm{font-family:var(--fd);font-size:15px;font-weight:600}
+.sch-day-tp{font-size:11px;color:var(--t3)}
+.sch-pills{display:flex;flex-wrap:wrap;gap:6px}
+.sch-pill{font-size:11px;padding:4px 10px;border-radius:100px;cursor:pointer;transition:all .15s;user-select:none}
+.sch-pill.on{background:var(--acd);color:var(--ac)}
+.sch-pill.off{background:var(--bg3);color:var(--t3)}
+
+/* AI CHAT */
+.ai-wrap{display:flex;flex-direction:column;height:calc(100dvh - 72px);padding-top:0}
+.ai-hdr{padding:52px 16px 10px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--bg)}
+.ai-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--pu));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ai-ttl{font-family:var(--fd);font-size:15px;font-weight:700}
+.ai-sub{font-size:10px;color:var(--t3)}
+.key-row{padding:8px 14px;border-bottom:1px solid var(--br);display:none;gap:8px;align-items:center;background:var(--bg2);flex-shrink:0}
+.key-row.show{display:flex}
+.key-inp{flex:1;background:var(--bg3);border:1px solid var(--br2);border-radius:8px;padding:8px 10px;color:var(--t1);font-family:var(--fb);font-size:12px;outline:none}
+.key-inp:focus{border-color:var(--ac)}
+.key-save{padding:8px 14px;border-radius:8px;border:none;background:var(--ac);color:#000;font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer}
+.quick-row{display:flex;gap:6px;overflow-x:auto;padding:8px 14px 0;scrollbar-width:none;flex-shrink:0}
+.quick-row::-webkit-scrollbar{display:none}
+.qbtn{padding:6px 12px;border-radius:100px;border:1px solid var(--br2);background:transparent;color:var(--t2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:var(--fb);transition:all .15s;flex-shrink:0}
+.qbtn:active{background:var(--acd);color:var(--ac);border-color:rgba(0,229,160,.3)}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;display:flex;flex-direction:column;gap:3px}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.ai{align-self:flex-start;align-items:flex-start}
+.msg-bubble{padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.6}
+.msg.user .msg-bubble{background:var(--ac);color:#000;border-radius:16px 16px 4px 16px}
+.msg.ai .msg-bubble{background:var(--card2);color:var(--t1);border-radius:16px 16px 16px 4px;border:1px solid var(--br2)}
+.msg-time{font-size:10px;color:var(--t3)}
+.chat-bar{padding:10px 14px max(env(safe-area-inset-bottom),10px);border-top:1px solid var(--br);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;background:var(--bg)}
+.chat-in{flex:1;background:var(--card2);border:1px solid var(--br2);border-radius:20px;padding:9px 14px;color:var(--t1);font-family:var(--fb);font-size:14px;outline:none;resize:none;max-height:100px;line-height:1.4;min-height:38px}
+.chat-in:focus{border-color:var(--ac)}
+.chat-send{width:38px;height:38px;border-radius:50%;border:none;background:var(--ac);color:#000;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-send:disabled{background:var(--bg3);color:var(--t3)}
+.typing-dots{display:flex;align-items:center;gap:4px;padding:10px 14px;background:var(--card2);border-radius:16px 16px 16px 4px;border:1px solid var(--br2);align-self:flex-start}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--t3);animation:tdot 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{opacity:.3;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+
+/* MODALS */
+.modal{position:fixed;inset:0;z-index:200;display:none}
+.modal.open{display:flex;flex-direction:column}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
+.modal-sheet{position:relative;margin-top:auto;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--br2);padding:0 0 max(env(safe-area-inset-bottom),24px);max-height:92vh;overflow-y:auto;animation:su .3s cubic-bezier(.32,.72,0,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-drag{width:36px;height:4px;background:var(--br2);border-radius:2px;margin:12px auto 0}
+.mc{padding:16px 20px 24px}
+.modal-title{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:14px}
+.btn-close{position:absolute;right:16px;top:16px;width:30px;height:30px;border-radius:50%;background:var(--card2);border:1px solid var(--br);cursor:pointer;color:var(--t2);font-size:13px;display:flex;align-items:center;justify-content:center}
+
+/* FORM */
+.fg{margin-bottom:12px}
+.fl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:block}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--br2);border-radius:var(--rsm);padding:9px 12px;color:var(--t1);font-family:var(--fb);font-size:14px;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--ac)}
+.fta{min-height:60px;resize:vertical;line-height:1.5}
+.fsel{appearance:none;-webkit-appearance:none;cursor:pointer}
+.step-row{display:flex;gap:7px;margin-bottom:6px}
+.step-row .fi{flex:1}
+.step-del{width:34px;height:38px;border-radius:8px;border:1px solid var(--br2);background:var(--bg3);color:var(--rd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.btn{padding:11px 22px;border-radius:100px;border:none;cursor:pointer;font-family:var(--fb);font-size:14px;font-weight:500;transition:all .15s}
+.btn-p{background:var(--ac);color:#000}
+.btn-s{background:var(--card2);color:var(--t2);border:1px solid var(--br2)}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+.timer-sec{background:var(--card2);border-radius:var(--rsm);padding:16px;margin:12px 0;text-align:center;border:1px solid var(--br)}
+.timer-disp{font-family:var(--fd);font-size:48px;font-weight:800;color:var(--ac);letter-spacing:-2px}
+.timer-btns{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+.steps-list{list-style:none}
+.step-item{display:flex;gap:12px;margin-bottom:11px}
+.step-n{width:24px;height:24px;border-radius:8px;background:var(--acd);color:var(--ac);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fd);flex-shrink:0}
+.step-text{font-size:13px;color:var(--t2);line-height:1.6;padding-top:3px}
+.step-text strong{color:var(--t1)}
+.tip-box{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-radius:var(--rsm);padding:12px 14px;font-size:13px;color:#7de8c4;line-height:1.5;display:flex;gap:10px;margin-top:12px}
+.info-box{background:var(--card2);border-radius:var(--rsm);padding:12px 14px;border:1px solid var(--br);margin-bottom:10px}
+.info-box p{font-size:13px;color:var(--t2);line-height:1.7}
+.info-box strong{color:var(--t1)}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--card2);border:1px solid var(--br2);border-radius:100px;padding:9px 20px;font-size:13px;color:var(--t1);z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.install-btn{position:fixed;bottom:90px;right:14px;background:var(--ac);color:#000;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;z-index:150;font-family:var(--fb);box-shadow:0 4px 20px rgba(0,229,160,.4);display:none}
+</style>
+</head>
+<body>
+
+<!-- TODAY -->
+<div class="page active" id="pg-today">
+  <div class="hdr">
+    <div class="hdr-lbl"><div class="adot"></div><span id="hdr-day">Понедельник</span></div>
+    <h1>Сегодня<br><em id="hdr-title">тренировка</em></h1>
+    <div class="hdr-sub" id="hdr-sub">2 сессии · оптимально для сидячего режима</div>
+  </div>
+  <div class="sc">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-n" id="st-sess">2</div><div class="stat-l">Сессии</div></div>
+      <div class="stat"><div class="stat-n" id="st-ex">0</div><div class="stat-l">Упр.</div></div>
+      <div class="stat"><div class="stat-n" id="st-done">0</div><div class="stat-l">Готово</div></div>
+    </div>
+    <div class="sl">🌅 Утро · ~10 мин</div>
+    <div class="sess open" id="sess-am">
+      <div class="sess-hdr" onclick="toggleSess('sess-am')">
+        <div class="sess-dot" style="background:var(--ac)"></div>
+        <div class="sess-info">
+          <div class="sess-name">Активация & Контроль</div>
+          <div class="sess-meta" id="am-meta">Загрузка...</div>
+        </div>
+        <div class="sess-arr">⌃</div>
+      </div>
+      <div class="sess-body" id="am-body"></div>
+    </div>
+    <div class="sl">🌆 Вечер · ~25 мин</div>
+    <div class="sess" id="sess-pm">
+      <div class="sess-hdr" onclick="toggleSess('sess-pm')">
+        <div class="sess-dot" style="background:var(--pu)"></div>
+        <div class="sess-info">
+          <div class="sess-name">Сила & Техника</div>
+          <div class="sess-meta" id="pm-meta">Загрузка...</div>
+        </div>
+        <div class="sess-arr">⌃</div>
+      </div>
+      <div class="sess-body" id="pm-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="page" id="pg-cal">
+  <div class="hdr">
+    <div class="hdr-lbl"><div class="adot"></div>История</div>
+    <h1>Календарь<br><em>активности</em></h1>
+  </div>
+  <div class="sc">
+    <div class="card">
+      <div class="cal-nav">
+        <button class="cal-btn" onclick="calNav(-1)">‹</button>
+        <div class="cal-month" id="cal-lbl"></div>
+        <button class="cal-btn" onclick="calNav(1)">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="sl">Привычки сегодня</div>
+    <div class="card">
+      <div class="hab-row">
+        <div class="hab-ico">🌅</div>
+        <div class="hab-info"><div class="hab-name">Утренняя сессия</div><div class="hab-sub">Кегель + дыхание · 10 мин</div></div>
+        <div class="tog" id="tog-am" onclick="toggleHabit('morning')"></div>
+      </div>
+      <div class="hab-row">
+        <div class="hab-ico">🌆</div>
+        <div class="hab-info"><div class="hab-name">Вечерняя сессия</div><div class="hab-sub">Сила + растяжка · 25 мин</div></div>
+        <div class="tog" id="tog-pm" onclick="toggleHabit('evening')"></div>
+      </div>
+      <div class="hab-row">
+        <div class="hab-ico">💧</div>
+        <div class="hab-info"><div class="hab-name">2 литра воды</div><div class="hab-sub">Улучшает кровоток и сосуды</div></div>
+        <div class="tog" id="tog-water" onclick="toggleHabit('water')"></div>
+      </div>
+      <div class="hab-row">
+        <div class="hab-ico">🛌</div>
+        <div class="hab-info"><div class="hab-name">8 часов сна</div><div class="hab-sub">Тестостерон вырабатывается ночью</div></div>
+        <div class="tog" id="tog-sleep" onclick="toggleHabit('sleep')"></div>
+      </div>
+      <div class="hab-row">
+        <div class="hab-ico">🏃</div>
+        <div class="hab-info"><div class="hab-name">Кардио / прогулка</div><div class="hab-sub">150+ мин в неделю = -41% риска ЭД</div></div>
+        <div class="tog" id="tog-cardio" onclick="toggleHabit('cardio')"></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2)"><div class="cdot full"></div>Все выполнено</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2)"><div class="cdot part"></div>Частично</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2)"><div class="cdot rest"></div>Отдых</div>
+    </div>
+  </div>
+</div>
+
+<!-- LIBRARY -->
+<div class="page" id="pg-lib">
+  <div class="hdr">
+    <div class="hdr-lbl"><div class="adot"></div>Упражнения</div>
+    <h1>База<br><em>упражнений</em></h1>
+    <div class="hdr-sub">✏️ нажми для редактирования</div>
+  </div>
+  <div class="sc">
+    <div class="filter-row">
+      <button class="fbtn active" onclick="filterLib('all',this)">Все</button>
+      <button class="fbtn" onclick="filterLib('control',this)">Контроль</button>
+      <button class="fbtn" onclick="filterLib('erection',this)">Эрекция</button>
+      <button class="fbtn" onclick="filterLib('technique',this)">Техника</button>
+      <button class="fbtn" onclick="filterLib('stretch',this)">Растяжка</button>
+    </div>
+    <div id="lib-list"></div>
+    <button class="add-btn" onclick="openEditModal(null)">＋ Добавить упражнение</button>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="page" id="pg-sch">
+  <div class="hdr">
+    <div class="hdr-lbl"><div class="adot"></div>Расписание</div>
+    <h1>Недельный<br><em>план</em></h1>
+    <div class="hdr-sub">Нажми на упражнение — вкл/выкл</div>
+  </div>
+  <div class="sc">
+    <div class="info-box"><p><strong>Для сидячей работы:</strong> утренние упражнения делай прямо в постели или на коврике дома (10 мин). Вечерние — после работы (25 мин). Не пропускай утро — оно важнее!</p></div>
+    <div id="sch-list"></div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div class="page" id="pg-trk">
+  <div class="hdr">
+    <div class="hdr-lbl"><div class="adot"></div>Прогресс</div>
+    <h1>Твой<br><em>трекер</em></h1>
+  </div>
+  <div class="sc">
+    <div class="streak-box">
+      <div class="streak-n" id="streak-n">0</div>
+      <div class="streak-lbl">дней подряд 🔥</div>
+      <div class="streak-sub" id="streak-sub">Начни сегодня — первый шаг самый важный</div>
+    </div>
+    <div class="sl">Эта неделя</div>
+    <div class="card"><div class="wk-dots" id="wk-dots"></div></div>
+    <div class="sl">Уровень развития</div>
+    <div class="card">
+      <div class="pbw"><div class="pbl"><span>Контроль</span><span id="p1">0%</span></div><div class="pb"><div class="pbf" id="pb1" style="width:0%;background:linear-gradient(90deg,var(--ac2),var(--ac))"></div></div></div>
+      <div class="pbw" style="margin-top:9px"><div class="pbl"><span>Эрекция</span><span id="p2">0%</span></div><div class="pb"><div class="pbf" id="pb2" style="width:0%;background:linear-gradient(90deg,#5a4fd4,var(--pu))"></div></div></div>
+      <div class="pbw" style="margin-top:9px"><div class="pbl"><span>Техника</span><span id="p3">0%</span></div><div class="pb"><div class="pbf" id="pb3" style="width:0%;background:linear-gradient(90deg,#c47a0a,var(--am))"></div></div></div>
+      <div class="pbw" style="margin-top:9px"><div class="pbl"><span>Выносливость</span><span id="p4">0%</span></div><div class="pb"><div class="pbf" id="pb4" style="width:0%;background:linear-gradient(90deg,#cc2a45,var(--rd))"></div></div></div>
+      <p style="font-size:11px;color:var(--t3);margin-top:10px">Растёт с каждой тренировкой. Полный эффект — 6–8 недель.</p>
+    </div>
+    <div class="sl">Научные факты</div>
+    <div class="card ca"><p style="font-size:13px;color:var(--t2);line-height:1.8"><strong style="color:var(--ac)">BJU International (2014):</strong> 40% мужчин полностью восстановили эрекцию через 3 мес. упражнений тазового дна. Ещё 35% значительно улучшили показатели.</p></div>
+    <div class="card cp"><p style="font-size:13px;color:var(--t2);line-height:1.8"><strong style="color:var(--pu)">ISSM Meta-Analysis (2018):</strong> 150+ мин кардио в неделю снижают риск ЭД на 41%. Аэробные нагрузки восстанавливают эндотелий сосудов.</p></div>
+    <div class="divider"></div>
+    <button class="add-btn" onclick="resetAll()">🗑 Сбросить прогресс</button>
+  </div>
+</div>
+
+<!-- AI CHAT -->
+<div class="page" id="pg-ai">
+  <div class="ai-wrap">
+    <div class="ai-hdr">
+      <div class="ai-avatar">🤖</div>
+      <div style="flex:1">
+        <div class="ai-ttl">AI Тренер</div>
+        <div class="ai-sub" id="ai-status">Введи API ключ для активации</div>
+      </div>
+      <button class="icn-btn" onclick="toggleKeyRow()" title="Настройки">⚙️</button>
+    </div>
+
+    <div class="key-row" id="key-row">
+      <input class="key-inp" id="api-inp" type="password" placeholder="sk-... (OpenAI API Key)">
+      <button class="key-save" onclick="saveKey()">Сохранить</button>
+    </div>
+
+    <div class="quick-row">
+      <button class="qbtn" onclick="qMsg('Объясни упражнение Кегель подробно')">💪 Кегель</button>
+      <button class="qbtn" onclick="qMsg('Как делать обратный Кегель правильно?')">🔄 Обратный Кегель</button>
+      <button class="qbtn" onclick="qMsg('Лучшие упражнения при сидячей работе?')">💺 Сидячий образ жизни</button>
+      <button class="qbtn" onclick="qMsg('Составь план на следующую неделю')">📅 План на неделю</button>
+      <button class="qbtn" onclick="qMsg('Через сколько появятся результаты?')">⏱ Результаты</button>
+      <button class="qbtn" onclick="qMsg('Что делать если нет времени на тренировку?')">⚡ Мало времени</button>
+      <button class="qbtn" onclick="qMsg('Как улучшить контроль эякуляции быстро?')">🎯 Контроль</button>
+    </div>
+
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg ai">
+        <div class="msg-bubble">Привет! Я твой AI тренер по мужскому здоровью 💪<br><br>Могу объяснить любое упражнение, составить персональный план, ответить на вопросы о технике и прогрессе.<br><br><strong>Для активации:</strong> нажми ⚙️ → введи OpenAI API ключ.<br>Получить: <strong>platform.openai.com</strong> → API Keys</div>
+        <div class="msg-time">Сейчас</div>
+      </div>
+    </div>
+
+    <div class="chat-bar">
+      <textarea class="chat-in" id="chat-in" placeholder="Задай вопрос..." rows="1" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="chat-send" id="chat-send" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal" id="m-detail">
+  <div class="modal-bg" onclick="closeM('m-detail')"></div>
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <button class="btn-close" onclick="closeM('m-detail')">✕</button>
+    <div class="mc" id="detail-body"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="m-edit">
+  <div class="modal-bg" onclick="closeM('m-edit')"></div>
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <button class="btn-close" onclick="closeM('m-edit')">✕</button>
+    <div class="mc">
+      <div class="modal-title" id="edit-lbl">Новое упражнение</div>
+      <input type="hidden" id="eid">
+      <div class="fg"><label class="fl">Название</label><input class="fi" id="ename" placeholder="Название упражнения"></div>
+      <div class="fg"><label class="fl">Категория</label>
+        <select class="fi fsel" id="ecat">
+          <option value="control">Контроль</option>
+          <option value="erection">Эрекция</option>
+          <option value="technique">Техника</option>
+          <option value="stretch">Растяжка</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Сеты / Повторения</label><input class="fi" id="esets" placeholder="3 × 15 повторений"></div>
+      <div class="fg"><label class="fl">Таймер (секунды, 0 = без)</label><input class="fi" id="etimer" type="number" min="0" value="0"></div>
+      <div class="fg"><label class="fl">Иконка</label><input class="fi" id="eicon" placeholder="💪"></div>
+      <div class="fg">
+        <label class="fl">Шаги выполнения</label>
+        <div id="steps-ed"></div>
+        <button type="button" class="add-btn" style="margin:6px 0 0;padding:8px;font-size:12px" onclick="addStep()">＋ Шаг</button>
+      </div>
+      <div class="fg"><label class="fl">Совет</label><textarea class="fi fta" id="etip" placeholder="Важный совет или научный факт..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-p" style="flex:1" onclick="saveEx()">Сохранить</button>
+        <button class="btn btn-s" onclick="closeM('m-edit')">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="install-btn" id="install-btn" onclick="installApp()">📱 Установить приложение</button>
+
+<nav class="nav">
+  <button class="ni active" onclick="goPage('today',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Сегодня
+  </button>
+  <button class="ni" onclick="goPage('cal',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Календарь
+  </button>
+  <button class="ni" onclick="goPage('lib',this)">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>База
+  </button>
+  <button class="ni" onclick="goPage('sch',this)">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Расписание
+  </button>
+  <button class="ni" onclick="goPage('trk',this)">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Трекер
+  </button>
+  <button class="ni" onclick="goPage('ai',this)">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI
+  </button>
+</nav>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const DEX=[
+  {id:'kegel',title:'Кегель классический',cat:'control',icon:'💪',sets:'3×15 · 3–10 сек',timer:10,
+   steps:['Найди мышцу: мысленно останови мочеиспускание — это ЛК-мышца. Запомни ощущение.',
+          'Сидя/лёжа/стоя. Ягодицы, живот и бёдра полностью расслаблены.',
+          'Сожми ЛК-мышцу на 3–10 секунд. Начинай с 3, прогрессируй до 10 за 4 недели.',
+          'Полностью расслабь мышцу на 5–10 секунд. Расслабление так же важно, как сжатие.',
+          '15 повторений = 1 сет. Делай 3 сета утром, днём и вечером.'],
+   tip:'Рука на животе — он должен быть неподвижным. Если двигается — сжимаешь не ту мышцу.'},
+  {id:'rkegel',title:'Обратный Кегель',cat:'control',icon:'🔄',sets:'3×10 · 5–8 сек расслабление',timer:8,
+   steps:['Большинство мужчин игнорируют это. Перетренированное тазовое дно → преждевременная эякуляция.',
+          'Не сжатие, а осознанное расслабление и раскрытие тазового дна. Как будто начинаешь мочиться.',
+          'На выдохе расширь и опусти тазовое дно. Удержи расслабление 5–8 секунд.',
+          'Чередуй с классическим Кегелем: 1 сжатие → 1 расслабление = полный нейромышечный контроль.'],
+   tip:'Обратный Кегель — секрет контроля. Позволяет «притормозить» возбуждение в нужный момент.'},
+  {id:'breathing',title:'Диафрагмальное дыхание',cat:'control',icon:'🫁',sets:'5–10 мин · ритм 4-2-6',timer:300,
+   steps:['Лёжа на спине. Одна рука на животе, другая на груди.',
+          'Правильное дыхание: рука на животе поднимается, рука на груди неподвижна.',
+          'Вдох 4 счёта → задержка 2 счёта → выдох 6 счётов. Выдох длиннее вдоха.',
+          'Активирует парасимпатическую нервную систему — снижает «спешку» и кортизол.'],
+   tip:'Используй во время близости когда возбуждение нарастает быстро. Работает мгновенно.'},
+  {id:'stopstart',title:'Метод Стоп-Старт',cat:'control',icon:'⏸️',sets:'3–5 циклов · 10–20 мин',timer:0,
+   steps:['Шкала возбуждения 1–10. Точка без возврата = 8–9. Цель: управлять в диапазоне 5–7.',
+          'Доведи возбуждение до уровня 7 из 10.',
+          'Полная остановка. 3 глубоких выдоха. Расслабь тазовое дно (обратный Кегель).',
+          'Жди пока уровень спадёт до 4–5. Повтори цикл 3–5 раз.'],
+   tip:'Золотой стандарт сексуальной терапии (Masters & Johnson). Эффект у 85% мужчин за 4–6 недель.'},
+  {id:'squat',title:'Приседания',cat:'erection',icon:'🏋️',sets:'4×15–20 повторений',timer:60,
+   steps:['Стопы чуть шире плеч, носки повёрнуты на 15–30°. Оптимально для активации таза.',
+          'Медленно опускайся 3 секунды до параллели бёдер или ниже.',
+          'Пауза внизу — максимальная активация ягодиц и тазового кровотока.',
+          'На подъёме сожми ягодицы + ЛК-мышцу в верхней точке. Удержи 1 секунду.'],
+   tip:'Повышают тестостерон на 15–25% в течение 30 мин после тренировки.'},
+  {id:'bridge',title:'Ягодичный мостик',cat:'erection',icon:'🌉',sets:'3×20 · удержание 3 сек',timer:30,
+   steps:['Лёжа на спине, ступни у ягодиц (15–20 см), ширина бёдер.',
+          'Надавли на пятки, поднимай таз вверх. Позвоночник раскручивается снизу вверх.',
+          'Сожми ягодицы + ЛК-мышцу максимально. Тело — прямая линия. Удержи 3 секунды.',
+          'Прогрессия: одноногий вариант (одна нога вытянута) — удвоит нагрузку на тазовое дно.'],
+   tip:'Лучшее упражнение для тазового дна и кровотока в малом тазу одновременно.'},
+  {id:'plank',title:'Планка + Кегель',cat:'technique',icon:'📐',sets:'3×45–60 секунд',timer:45,
+   steps:['Упор на предплечьях. Прямая линия от головы до пяток.',
+          'Слегка подкрути таз вперёд. Лёгкое втягивание живота.',
+          'Каждые 5 сек ритмично: сожми ЛК-мышцу на 3 сек → расслабь 2 сек.',
+          'Не задерживай дыхание — ровное дыхание создаёт правильную внутрибрюшную нагрузку.'],
+   tip:'Тренирует управление тазовым дном под нагрузкой — прямо влияет на технику.'},
+  {id:'piriformis',title:'Растяжка грушевидной',cat:'stretch',icon:'🍑',sets:'2×60–90 сек · каждая сторона',timer:60,
+   steps:['Грушевидная мышца у сидячих людей хронически перенапряжена. Нарушает кровоток в тазу.',
+          'Лёжа на спине: правая нога согнута, левая лодыжка на правом колене (цифра 4).',
+          'Обхвати руками заднюю поверхность правого бедра и потяни обе ноги к груди.',
+          'Удержи 60–90 секунд, глубоко дыши. Поменяй сторону.'],
+   tip:'Делай сразу после работы. Одно из самых недооценённых упражнений для мужского здоровья.'},
+  {id:'hipflex',title:'Сгибатели бедра',cat:'stretch',icon:'🦵',sets:'2×60 сек · каждая сторона',timer:60,
+   steps:['Выпад на колено: правое колено на полу, левая нога впереди под углом 90°.',
+          'Таз толкай вперёд и вниз, не наклоняя туловище. Спина прямая.',
+          'Натяжение в передней части правого бедра и паховой области.',
+          'Напряги правую ягодицу во время растяжки — это углубит воздействие.'],
+   tip:'Сжатые сгибатели ограничивают подвижность таза — снижают качество движений. 2 мин в день меняют это.'},
+  {id:'isometric',title:'Изометрия промежности',cat:'technique',icon:'⚡',sets:'3×10 · 5–8 сек удержание',timer:8,
+   steps:['Не просто ЛК-мышца: активируется вся область тазового дна, включая поперечные мышцы.',
+          'Представь, что поднимаешь шар снизу вверх и внутрь — это активирует мышцы со всех сторон.',
+          'Удержи 5–8 секунд на максимальном напряжении. Полное расслабление 5 секунд.',
+          'Тренируй в разных позах: сидя, стоя, во время приседания — разные углы = полный контроль.'],
+   tip:'Мост между силой и реальным применением. Мастера делают это незаметно в любом месте.'}
+];
+const DSCH={
+  0:{name:'Пн',exercises:['kegel','rkegel','squat','bridge']},
+  1:{name:'Вт',exercises:['breathing','isometric','piriformis','hipflex']},
+  2:{name:'Ср',exercises:['kegel','plank','squat','stopstart']},
+  3:{name:'Чт',exercises:['breathing','bridge','piriformis','rkegel']},
+  4:{name:'Пт',exercises:['kegel','rkegel','isometric','squat','plank']},
+  5:{name:'Сб',exercises:['breathing','hipflex','bridge']},
+  6:{name:'Вс',exercises:[]}
+};
+const DAYS=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const DS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const CCLS={control:'bt',erection:'ba',technique:'bp',stretch:'br_'};
+const CICO={control:'ico-t',erection:'ico-a',technique:'ico-p',stretch:'ico-r'};
+const CLBL={control:'Контроль',erection:'Эрекция',technique:'Техника',stretch:'Растяжка'};
+
+function load(){
+  try{return{
+    ex:JSON.parse(localStorage.getItem('mc_ex'))||JSON.parse(JSON.stringify(DEX)),
+    sch:JSON.parse(localStorage.getItem('mc_sch'))||JSON.parse(JSON.stringify(DSCH)),
+    comp:JSON.parse(localStorage.getItem('mc_comp'))||{},
+    hab:JSON.parse(localStorage.getItem('mc_hab'))||{}
+  };}catch(e){return{ex:JSON.parse(JSON.stringify(DEX)),sch:JSON.parse(JSON.stringify(DSCH)),comp:{},hab:{}};}
+}
+function save(d){localStorage.setItem('mc_ex',JSON.stringify(d.ex));localStorage.setItem('mc_sch',JSON.stringify(d.sch));localStorage.setItem('mc_comp',JSON.stringify(d.comp));localStorage.setItem('mc_hab',JSON.stringify(d.hab));}
+let D=load();
+let calY=new Date().getFullYear(),calM=new Date().getMonth(),libF='all',aTmr=null;
+function tk(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function dk(y,m,day){return `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+
+// ── NAV ──────────────────────────────────────────────
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  el.classList.add('active');
+  D=load();
+  ({cal:renderCal,lib:renderLib,sch:renderSch,trk:renderTrk})[id]?.();
+}
+
+// ── TODAY ─────────────────────────────────────────────
+function renderToday(){
+  D=load();
+  const d=new Date(),dow=d.getDay(),schDow=dow===0?6:dow-1;
+  const ts=D.sch[schDow]||{exercises:[]};
+  const all=ts.exercises,mid=Math.ceil(all.length/2);
+  const amIds=all.slice(0,mid),pmIds=all.slice(mid);
+  const t=tk();
+  document.getElementById('hdr-day').textContent=DAYS[dow];
+  document.getElementById('hdr-title').textContent=all.length?'тренировка':'день отдыха';
+  document.getElementById('hdr-sub').textContent=all.length?`${all.length} упражнений · 2 сессии`:'Лёгкая растяжка и дыхание';
+  let done=0;all.forEach(id=>{if(D.comp[t]?.[id])done++;});
+  document.getElementById('st-sess').textContent=all.length?'2':'—';
+  document.getElementById('st-ex').textContent=all.length;
+  document.getElementById('st-done').textContent=done;
+  renderSB('am-body',amIds,t);renderSB('pm-body',pmIds,t);
+  document.getElementById('am-meta').textContent=amIds.map(id=>D.ex.find(e=>e.id===id)?.title||id).join(' · ')||'Нет упражнений';
+  document.getElementById('pm-meta').textContent=pmIds.map(id=>D.ex.find(e=>e.id===id)?.title||id).join(' · ')||'Нет упражнений';
+}
+function renderSB(cid,ids,t){
+  const c=document.getElementById(cid);
+  if(!ids.length){c.innerHTML='<div style="padding:18px;text-align:center;color:var(--t3);font-size:13px">Нет упражнений — добавь в Расписании!</div>';return;}
+  c.innerHTML=ids.map((id,i)=>{const ex=D.ex.find(e=>e.id===id);if(!ex)return'';const done=D.comp[t]?.[id];
+    return`<div class="exi" onclick="openDetail('${id}')"><div class="exi-n">${i+1}</div><div class="exi-info"><div class="exi-name">${ex.icon||'💪'} ${ex.title}</div><div class="exi-sets">${ex.sets}</div></div><div class="exi-chk${done?' done':''}" onclick="toggleComp(event,'${id}','${t}')"></div></div>`;
+  }).join('');
+}
+function toggleComp(e,id,t){e.stopPropagation();D=load();if(!D.comp[t])D.comp[t]={};D.comp[t][id]=!D.comp[t][id];save(D);renderToday();}
+function toggleSess(id){document.getElementById(id).classList.toggle('open');}
+
+// ── CALENDAR ─────────────────────────────────────────
+function renderCal(){
+  D=load();
+  const first=new Date(calY,calM,1),last=new Date(calY,calM+1,0);
+  document.getElementById('cal-lbl').textContent=`${MONTHS[calM]} ${calY}`;
+  let html=DS.map(d=>`<div class="cal-dl">${d}</div>`).join('');
+  for(let i=0;i<first.getDay();i++)html+=`<div class="cal-d other"><div class="dn"></div></div>`;
+  const now=new Date();
+  for(let day=1;day<=last.getDate();day++){
+    const dkey=dk(calY,calM,day);
+    const hc=Object.values(D.hab[dkey]||{}).filter(Boolean).length;
+    const dc=Object.values(D.comp[dkey]||{}).filter(Boolean).length;
+    const isToday=calY===now.getFullYear()&&calM===now.getMonth()&&day===now.getDate();
+    const isFuture=new Date(calY,calM,day)>now;
+    let dot='';
+    if(!isFuture&&(hc>0||dc>0)){const cls=hc>=4?'full':hc>1||dc>0?'part':'rest';dot=`<div class="cdot ${cls}"></div>`;}
+    html+=`<div class="cal-d${isToday?' today':''}"><div class="dn">${day}</div>${dot}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+  const h=D.hab[tk()]||{};
+  [['tog-am','morning'],['tog-pm','evening'],['tog-water','water'],['tog-sleep','sleep'],['tog-cardio','cardio']].forEach(([el,key])=>{document.getElementById(el)?.classList.toggle('on',!!h[key]);});
+}
+function calNav(dir){calM+=dir;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
+function toggleHabit(key){D=load();const t=tk();if(!D.hab[t])D.hab[t]={};D.hab[t][key]=!D.hab[t][key];save(D);renderCal();renderTrk();}
+
+// ── LIBRARY ───────────────────────────────────────────
+function renderLib(){
+  D=load();
+  const list=libF==='all'?D.ex:D.ex.filter(e=>e.cat===libF);
+  if(!list.length){document.getElementById('lib-list').innerHTML='<div style="padding:30px;text-align:center;color:var(--t3)">📚 Нет упражнений. Добавь!</div>';return;}
+  document.getElementById('lib-list').innerHTML=list.map(ex=>`
+    <div class="lib-card">
+      <div class="lib-ico ${CICO[ex.cat]||'ico-t'}">${ex.icon||'💪'}</div>
+      <div class="lib-info"><div class="lib-name">${ex.title}</div><div class="lib-meta"><span class="badge ${CCLS[ex.cat]||'bt'}">${CLBL[ex.cat]||ex.cat}</span> · ${ex.sets}</div></div>
+      <div class="lib-acts">
+        <button class="icn-btn" onclick="openDetail('${ex.id}')">👁</button>
+        <button class="icn-btn" onclick="openEditModal('${ex.id}')">✏️</button>
+        <button class="icn-btn del" onclick="delEx('${ex.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+function filterLib(cat,el){libF=cat;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderLib();}
+function delEx(id){if(!confirm('Удалить упражнение?'))return;D=load();D.ex=D.ex.filter(e=>e.id!==id);Object.keys(D.sch).forEach(k=>{D.sch[k].exercises=D.sch[k].exercises.filter(eid=>eid!==id);});save(D);renderLib();showT('Удалено');}
+
+// ── EDIT MODAL ────────────────────────────────────────
+function openEditModal(id){
+  D=load();const ex=id?D.ex.find(e=>e.id===id):null;
+  document.getElementById('edit-lbl').textContent=ex?'Редактировать':'Новое упражнение';
+  document.getElementById('eid').value=ex?ex.id:'';
+  document.getElementById('ename').value=ex?ex.title:'';
+  document.getElementById('ecat').value=ex?ex.cat:'control';
+  document.getElementById('esets').value=ex?ex.sets:'';
+  document.getElementById('etimer').value=ex?ex.timer:0;
+  document.getElementById('eicon').value=ex?(ex.icon||'💪'):'💪';
+  document.getElementById('etip').value=ex?(ex.tip||''):'';
+  renderSteps(ex?.steps||['']);
+  openM('m-edit');
+}
+function renderSteps(steps){
+  document.getElementById('steps-ed').innerHTML=steps.map((s,i)=>`
+    <div class="step-row"><input class="fi" placeholder="Шаг ${i+1}" value="${s.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"><button type="button" class="step-del" onclick="rmStep(${i})">✕</button></div>`).join('');
+}
+function addStep(){const rows=document.querySelectorAll('#steps-ed .step-row');const steps=Array.from(rows).map(r=>r.querySelector('input').value);steps.push('');renderSteps(steps);}
+function rmStep(i){const rows=document.querySelectorAll('#steps-ed .step-row');const steps=Array.from(rows).map(r=>r.querySelector('input').value);steps.splice(i,1);renderSteps(steps.length?steps:['']);}
+function saveEx(){
+  D=load();
+  const id=document.getElementById('eid').value;
+  const steps=Array.from(document.querySelectorAll('#steps-ed .step-row')).map(r=>r.querySelector('input').value).filter(s=>s.trim());
+  const name=document.getElementById('ename').value.trim();
+  if(!name){showT('Введи название!');return;}
+  const ex={id:id||'ex_'+Date.now(),title:name,cat:document.getElementById('ecat').value,icon:document.getElementById('eicon').value.trim()||'💪',sets:document.getElementById('esets').value.trim(),timer:parseInt(document.getElementById('etimer').value)||0,steps,tip:document.getElementById('etip').value.trim()};
+  if(id)D.ex=D.ex.map(e=>e.id===id?ex:e);else D.ex.push(ex);
+  save(D);closeM('m-edit');renderLib();showT(id?'Обновлено ✓':'Добавлено ✓');
+}
+
+// ── DETAIL MODAL ──────────────────────────────────────
+function openDetail(id){
+  D=load();const ex=D.ex.find(e=>e.id===id);if(!ex)return;
+  let h=`<div style="margin-bottom:10px"><span class="badge ${CCLS[ex.cat]||'bt'}">${CLBL[ex.cat]||ex.cat}</span></div>`;
+  h+=`<div style="font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:5px">${ex.icon||'💪'} ${ex.title}</div>`;
+  h+=`<div style="font-size:13px;color:var(--t2);margin-bottom:16px">${ex.sets}</div>`;
+  if(ex.steps?.length){h+='<ol class="steps-list">';ex.steps.forEach((s,i)=>{h+=`<li class="step-item"><div class="step-n">${i+1}</div><div class="step-text">${s}</div></li>`;});h+='</ol>';}
+  if(ex.timer>0){const lbl=ex.timer>=60?Math.floor(ex.timer/60)+'мин':ex.timer+'сек';h+=`<div class="timer-sec"><div class="timer-disp" id="td">--</div><div style="font-size:10px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.1em">Таймер</div><div class="timer-btns"><button class="btn btn-p" onclick="startTmr(${ex.timer})">▶ ${lbl}</button><button class="btn btn-s" onclick="stopTmr()">Стоп</button></div></div>`;}
+  if(ex.tip)h+=`<div class="tip-box">💡 ${ex.tip}</div>`;
+  document.getElementById('detail-body').innerHTML=h;openM('m-detail');
+}
+function startTmr(s){stopTmr();let rem=s;const el=document.getElementById('td');if(!el)return;const fmt=n=>n>=60?Math.floor(n/60)+':'+String(n%60).padStart(2,'0'):String(n).padStart(2,'0');el.textContent=fmt(rem);aTmr=setInterval(()=>{rem--;el.textContent=rem<=0?(clearInterval(aTmr),'✓'):fmt(rem);},1000);}
+function stopTmr(){if(aTmr){clearInterval(aTmr);aTmr=null;}}
+
+// ── SCHEDULE ──────────────────────────────────────────
+function renderSch(){
+  D=load();
+  document.getElementById('sch-list').innerHTML=Object.entries(D.sch).map(([dow,day])=>{
+    const pills=D.ex.map(ex=>{const on=day.exercises.includes(ex.id);return`<div class="sch-pill ${on?'on':'off'}" onclick="toggleSchEx(${dow},'${ex.id}')">${on?'✓ ':''}${ex.icon||''} ${ex.title}</div>`;}).join('');
+    return`<div class="sch-day"><div class="sch-day-hdr"><div class="sch-day-nm">${day.name}</div><div class="sch-day-tp">${day.exercises.length} упр.</div></div><div class="sch-pills">${pills||'<span style="color:var(--t3);font-size:12px">День отдыха</span>'}</div></div>`;
+  }).join('');
+}
+function toggleSchEx(dow,id){D=load();const arr=D.sch[dow].exercises;const i=arr.indexOf(id);i>=0?arr.splice(i,1):arr.push(id);save(D);renderSch();showT(i>=0?'Убрано':'Добавлено');}
+
+// ── TRACKER ───────────────────────────────────────────
+function renderTrk(){
+  D=load();const streak=calcStreak();
+  document.getElementById('streak-n').textContent=streak;
+  document.getElementById('streak-sub').textContent=streak===0?'Начни сегодня — первый шаг самый важный':streak<7?'Отличное начало! Продолжай!':streak<30?'🔥 Ты в потоке! Не останавливайся!':'🏆 Легенда! '+streak+' дней подряд!';
+  const now=new Date();
+  document.getElementById('wk-dots').innerHTML=Array.from({length:7},(_,i)=>{
+    const dd=new Date(now);dd.setDate(now.getDate()-(6-i));
+    const dkey=dk(dd.getFullYear(),dd.getMonth(),dd.getDate());
+    const active=Object.values(D.hab[dkey]||{}).some(Boolean)||Object.values(D.comp[dkey]||{}).some(Boolean);
+    const isFuture=dd>now;const isToday=i===6;
+    const cls=isFuture?'rest':active?(isToday?'today-dot':'done'):'rest';
+    return`<div class="wk-d ${cls}">${DS[dd.getDay()]}</div>`;
+  }).join('');
+  const cats={control:0,erection:0,technique:0,stretch:0};
+  Object.values(D.comp).forEach(dc=>{Object.entries(dc).forEach(([id,done])=>{if(done){const ex=D.ex.find(e=>e.id===id);if(ex&&cats[ex.cat]!==undefined)cats[ex.cat]++;}});});
+  const pct=n=>Math.min(100,Math.round(n/120*100));
+  [['p1','pb1',cats.control],['p2','pb2',cats.erection],['p3','pb3',cats.technique],['p4','pb4',cats.stretch]].forEach(([pid,bid,v])=>{const p=pct(v);document.getElementById(pid).textContent=p+'%';document.getElementById(bid).style.width=p+'%';});
+}
+function calcStreak(){let s=0;const d=new Date();for(let i=0;i<365;i++){const dd=new Date(d);dd.setDate(d.getDate()-i);const dkey=dk(dd.getFullYear(),dd.getMonth(),dd.getDate());const active=Object.values(D.hab[dkey]||{}).some(Boolean)||Object.values(D.comp[dkey]||{}).some(Boolean);if(active)s++;else if(i>0)break;}return s;}
+function resetAll(){if(!confirm('Сбросить весь прогресс и привычки?'))return;D=load();D.comp={};D.hab={};save(D);renderTrk();showT('Прогресс сброшен');}
+
+// ── AI CHAT ───────────────────────────────────────────
+let history=[];
+const SYS=`Ты персональный AI тренер по мужскому здоровью. Ты эксперт в:
+- Упражнениях для тазового дна (Кегель, обратный Кегель, изометрия промежности)  
+- Контроле эякуляции (стоп-старт, сжатие, дыхательные техники)
+- Улучшении эрекции (кровоток, тестостерон, кардио, сосуды)
+- Технике и гибкости таза (растяжки грушевидной, сгибателей бедра, подвижность)
+- Научных данных и исследованиях по мужскому здоровью
+Отвечай коротко и практично по-русски. Максимум 200 слов. Конкретные советы, без воды.`;
+
+function toggleKeyRow(){const r=document.getElementById('key-row');r.classList.toggle('show');}
+function saveKey(){
+  const key=document.getElementById('api-inp').value.trim();
+  if(!key||!key.startsWith('sk-')){showT('Неверный формат ключа (должен начинаться с sk-)');return;}
+  localStorage.setItem('mc_key',key);
+  document.getElementById('key-row').classList.remove('show');
+  document.getElementById('api-inp').value='';
+  document.getElementById('ai-status').textContent='✅ Активен · GPT-4o';
+  showT('API ключ сохранён ✓');
+  addAiMsg('Отлично! OpenAI подключён. Я готов помогать — задай любой вопрос о тренировках или здоровье 💪');
+}
+function getKey(){return localStorage.getItem('mc_key')||'';}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-in');
+  const text=inp.value.trim();if(!text)return;
+  const key=getKey();
+  if(!key){addAiMsg('Нужен API ключ. Нажми ⚙️ и введи ключ от platform.openai.com');return;}
+  addUserMsg(text);inp.value='';resize(inp);
+  history.push({role:'user',content:text});
+  const typing=addTyping();
+  document.getElementById('chat-send').disabled=true;
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:500,messages:[{role:'system',content:SYS},...history]})
+    });
+    const data=await res.json();
+    typing.remove();
+    if(data.choices?.[0]?.message?.content){
+      const reply=data.choices[0].message.content;
+      history.push({role:'assistant',content:reply});
+      addAiMsg(reply);
+    }else{
+      addAiMsg('Ошибка: '+(data.error?.message||'Проверь API ключ в ⚙️'));
+    }
+  }catch(err){typing.remove();addAiMsg('Ошибка соединения. Проверь интернет.');}
+  document.getElementById('chat-send').disabled=false;
+}
+function addUserMsg(text){const now=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});const d=document.createElement('div');d.className='msg user';d.innerHTML=`<div class="msg-bubble">${text.replace(/</g,'&lt;')}</div><div class="msg-time">${now}</div>`;const m=document.getElementById('chat-msgs');m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function addAiMsg(text){const now=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});const d=document.createElement('div');d.className='msg ai';d.innerHTML=`<div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="msg-time">${now}</div>`;const m=document.getElementById('chat-msgs');m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function addTyping(){const d=document.createElement('div');d.className='typing-dots';d.innerHTML='<span></span><span></span><span></span>';const m=document.getElementById('chat-msgs');m.appendChild(d);m.scrollTop=m.scrollHeight;return d;}
+function qMsg(text){document.getElementById('chat-in').value=text;sendMsg();}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+// ── MODALS / TOAST ────────────────────────────────────
+function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeM(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';stopTmr();}
+let toastT;
+function showT(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ── PWA INSTALL ───────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  const btn=document.getElementById('install-btn');
+  btn.style.display='block';
+  setTimeout(()=>btn.style.display='none',20000);
+});
+function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{document.getElementById('install-btn').style.display='none';deferredPrompt=null;});}}
+window.addEventListener('appinstalled',()=>{document.getElementById('install-btn').style.display='none';showT('Приложение установлено! 🎉');});
+if(window.matchMedia('(display-mode: standalone)').matches){document.getElementById('install-btn').style.display='none';}
+
+// ── SERVICE WORKER ────────────────────────────────────
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+// ── INIT ──────────────────────────────────────────────
+if(getKey())document.getElementById('ai-status').textContent='✅ Активен · GPT-4o';
+renderToday();renderCal();
+</script>
+</body>
+</html>
